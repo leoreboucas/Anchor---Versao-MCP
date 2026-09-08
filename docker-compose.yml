@@ -1,0 +1,101 @@
+services:
+  raw_data:
+    build: ./backend_services/raw_data
+    container_name: raw_data
+    hostname: raw_data
+    restart: always
+    ports:
+      - 9001:9001
+    volumes:
+      - ./backend_services/raw_data:/backend_services/raw_data
+    command: python app.py
+    networks:
+      - mcp_network
+  punctuation:
+    build: ./backend_services/punctuation
+    container_name: punctuation
+    hostname: punctuation
+    restart: always
+    ports:
+      - 9002:9001
+    volumes:
+      - ./backend_services/punctuation:/backend_services/punctuation
+    command: python app.py
+    networks:
+      - mcp_network
+
+  aggregation:
+    build: ./backend_services/aggregation
+    container_name: aggregation
+    hostname: aggregation
+    restart: always
+    ports:
+      - 9003:9001
+    volumes:
+      - ./backend_services/aggregation:/backend_services/aggregation
+    command: python app.py
+    networks:
+      - mcp_network
+
+  raw_data_mcp:
+      build: ./mcp_servers/raw_data
+      container_name: raw_data_mcp
+      hostname: mcp_raw_data
+      restart: always
+      ports:
+        - 7001:9001
+      volumes:
+        - ./mcp_servers/raw_data:/mcp_servers/raw_data
+      command: python tools.py
+      networks:
+        - mcp_network
+
+  punctuation_mcp:
+      build: ./mcp_servers/punctuation
+      container_name: punctuation_mcp
+      hostname: mcp_punctuation
+      restart: always
+      ports:
+        - 7002:9001
+      volumes:
+        - ./mcp_servers/punctuation:/mcp_servers/punctuation
+      command: python tools.py
+      networks:
+        - mcp_network
+  
+  aggregation_mcp:
+      build: ./mcp_servers/aggregation
+      container_name: aggregation_mcp
+      hostname: mcp_aggregation
+      restart: always
+      ports:
+        - 7003:9001
+      volumes:
+        - ./mcp_servers/aggregation:/mcp_servers/aggregation
+      command: python tools.py
+      networks:
+        - mcp_network
+
+  database:
+    image: postgres:latest
+    container_name: database
+    hostname: database
+    restart: always
+    ports:
+      - "7004:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=anchor
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./anchor_db:/docker-entrypoint-initdb.d
+    networks:
+      - mcp_network
+
+
+networks:
+  mcp_network:
+    external: true
+

@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>People Analytics | Bem-estar Corporativo</title>
+
+    <meta
+        name="description"
+        content="Dashboard de indicadores agregados e anônimos de bem-estar corporativo."
+    >
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="app-shell">
+        ====================================================== -->
+<div id="chat-widget">
+
+    <button id="chat-toggle" type="button" aria-label="Abrir chat">
+        <span id="chat-toggle-icon">💬</span>
+    </button>
+
+    <div id="chat-panel" hidden>
+
+        <div id="chat-panel-header">
+            <div>
+                <strong>Assistente de Indicadores</strong>
+                <span>Pergunte sobre os dados de bem-estar</span>
+            </div>
+
+            <button id="chat-close" type="button" aria-label="Fechar chat">
+                ✕
+            </button>
+        </div>
+
+        <div id="chat-messages"></div>
+
+        <form id="chat-form">
+            <input
+                type="text"
+                id="chat-input"
+                placeholder="Pergunte algo sobre os indicadores..."
+                autocomplete="off"
+                required
+            >
+            <button type="submit">Enviar</button>
+        </form>
+
+    </div>
+
+</div>
+
+        <!-- =========================================================
+             HEADER
+        ========================================================== -->
+        <header class="dashboard-header">
+
+            <div class="header-content">
+
+                <div class="header-brand">
+                    <span class="brand-eyebrow">PEOPLE ANALYTICS</span>
+
+                    <h1>
+                        Indicadores de Bem-estar Corporativo
+                    </h1>
+
+                    <p>
+                        Consulta consolidada de indicadores de percepção,
+                        participação e bem-estar dos colaboradores.
+                    </p>
+                </div>
+
+                <div class="header-status">
+                    <span class="status-indicator" id="global-status-indicator"></span>
+
+                    <div class="header-status-content">
+                        <span class="header-status-label">
+                            Atualização automática
+                        </span>
+
+                        <span class="header-status-value" id="global-status-text">
+                            Conectando...
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================================================
+             MAIN
+        ========================================================== -->
+        <main class="dashboard-main">
+
+
+            <!-- =====================================================
+                 CONNECTION ALERT
+            ====================================================== -->
+            <div
+                class="connection-alert"
+                id="connection-alert"
+                hidden
+            >
+                <div class="connection-alert-icon">
+                    !
+                </div>
+
+                <div>
+                    <strong>Conexão com os serviços instável</strong>
+
+                    <p>
+                        Algumas informações podem estar temporariamente
+                        indisponíveis. Os últimos dados válidos serão
+                        preservados enquanto a conexão é restabelecida.
+                    </p>
+                </div>
+            </div>
+
+
+            <!-- =====================================================
+                 01 — RESPONSE COUNTS
+            ====================================================== -->
+            <section
+                class="dashboard-section"
+                id="response-counts-section"
+                data-source="raw_data"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-number">01</span>
+
+                        <div class="section-title-group">
+                            <span class="section-eyebrow">
+                                RESPOSTAS
+                            </span>
+
+                            <h2>
+                                Volume de respostas
+                            </h2>
+
+                            <p>
+                                Quantidade de respostas registradas
+                                e sua distribuição entre as alternativas
+                                do questionário.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="section-status"
+                        id="response-counts-status"
+                    >
+                        <span class="status-dot"></span>
+                        <span class="status-text">
+                            Aguardando dados
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+                <div class="filters-bar">
+
+                    <div class="filter-group">
+
+                        <label for="response-period-filter">
+                            Período
+                        </label>
+
+                        <select id="response-period-filter">
+                            <option value="all">
+                                Todos os períodos
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="response-region-filter">
+                            Região
+                        </label>
+
+                        <select id="response-region-filter">
+                            <option value="all">
+                                Todas as regiões
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="response-country-filter">
+                            País
+                        </label>
+
+                        <select id="response-country-filter">
+                            <option value="all">
+                                Todos os países
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="response-category-filter">
+                            Categoria
+                        </label>
+
+                        <select id="response-category-filter">
+                            <option value="all">
+                                Todas as categorias
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- KPI cards -->
+                <div class="metrics-grid metrics-grid-3">
+
+                    <article class="metric-card">
+
+                        <div class="metric-card-header">
+                            <span class="metric-label">
+                                Total de respostas
+                            </span>
+                        </div>
+
+                        <strong
+                            class="metric-value"
+                            id="response-total"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="response-total-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <div class="metric-card-header">
+                            <span class="metric-label">
+                                Período mais recente
+                            </span>
+                        </div>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="response-latest-period"
+                        >
+                            —
+                        </strong>
+
+                        <span class="metric-description">
+                            Último período disponível
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <div class="metric-card-header">
+                            <span class="metric-label">
+                                Categoria mais respondida
+                            </span>
+                        </div>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="response-top-category"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="response-top-category-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Charts -->
+                <div class="chart-grid chart-grid-2">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Evolução do volume de respostas
+                                </h3>
+
+                                <p>
+                                    Quantidade total registrada por período.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="response-volume-chart"></canvas>
+                        </div>
+
+                    </article>
+
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Respostas por opção
+                                </h3>
+
+                                <p>
+                                    Distribuição das alternativas selecionadas.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="response-options-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Empty state -->
+                <div
+                    class="empty-state"
+                    id="response-counts-empty"
+                    hidden
+                >
+                    <span class="empty-state-icon">—</span>
+
+                    <h3>
+                        Nenhum dado disponível
+                    </h3>
+
+                    <p>
+                        Não existem respostas disponíveis para os filtros
+                        selecionados.
+                    </p>
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================================
+                 02 — RESPONDENTS
+            ====================================================== -->
+            <section
+                class="dashboard-section"
+                id="respondents-section"
+                data-source="respondents"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-number">02</span>
+
+                        <div class="section-title-group">
+                            <span class="section-eyebrow">
+                                PARTICIPAÇÃO
+                            </span>
+
+                            <h2>
+                                Respondentes
+                            </h2>
+
+                            <p>
+                                Quantidade de colaboradores participantes,
+                                apresentada de forma agregada por região,
+                                país e departamento.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="section-status"
+                        id="respondents-status"
+                    >
+                        <span class="status-dot"></span>
+
+                        <span class="status-text">
+                            Aguardando dados
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+                <div class="filters-bar">
+
+                    <div class="filter-group">
+
+                        <label for="respondents-period-filter">
+                            Período
+                        </label>
+
+                        <select id="respondents-period-filter">
+                            <option value="all">
+                                Todos os períodos
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="respondents-region-filter">
+                            Região
+                        </label>
+
+                        <select id="respondents-region-filter">
+                            <option value="all">
+                                Todas as regiões
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="respondents-country-filter">
+                            País
+                        </label>
+
+                        <select id="respondents-country-filter">
+                            <option value="all">
+                                Todos os países
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="respondents-department-filter">
+                            Departamento
+                        </label>
+
+                        <select id="respondents-department-filter">
+                            <option value="all">
+                                Todos os departamentos
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- KPI -->
+                <div class="metrics-grid metrics-grid-3">
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Total de respondentes
+                        </span>
+
+                        <strong
+                            class="metric-value"
+                            id="respondents-total"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="respondents-total-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Região com maior participação
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="respondents-top-region"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="respondents-top-region-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Departamento com maior participação
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="respondents-top-department"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="respondents-top-department-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Charts -->
+                <div class="chart-grid chart-grid-2">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+                            <div>
+                                <h3>
+                                    Respondentes por região
+                                </h3>
+
+                                <p>
+                                    Participação agregada entre as regiões.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="respondents-region-chart"></canvas>
+                        </div>
+
+                    </article>
+
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+                            <div>
+                                <h3>
+                                    Respondentes por departamento
+                                </h3>
+
+                                <p>
+                                    Participação agregada por área.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="respondents-department-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="chart-grid chart-grid-1">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+                            <div>
+                                <h3>
+                                    Evolução de respondentes
+                                </h3>
+
+                                <p>
+                                    Número de colaboradores participantes
+                                    ao longo dos períodos disponíveis.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="respondents-trend-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="respondents-empty"
+                    hidden
+                >
+                    <span class="empty-state-icon">—</span>
+
+                    <h3>
+                        Nenhum dado disponível
+                    </h3>
+
+                    <p>
+                        Não existem dados de respondentes para os filtros
+                        selecionados.
+                    </p>
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================================
+                 03 — SCORE DISTRIBUTION
+            ====================================================== -->
+            <section
+                class="dashboard-section"
+                id="score-distribution-section"
+                data-source="score_distribution"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-number">03</span>
+
+                        <div class="section-title-group">
+                            <span class="section-eyebrow">
+                                DISTRIBUIÇÃO
+                            </span>
+
+                            <h2>
+                                Distribuição de pontuações
+                            </h2>
+
+                            <p>
+                                Distribuição agregada das pontuações
+                                por faixa, categoria e subcategoria.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="section-status"
+                        id="score-distribution-status"
+                    >
+                        <span class="status-dot"></span>
+
+                        <span class="status-text">
+                            Aguardando dados
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+                <div class="filters-bar">
+
+                    <div class="filter-group">
+
+                        <label for="distribution-period-filter">
+                            Período
+                        </label>
+
+                        <select id="distribution-period-filter">
+                            <option value="all">
+                                Todos os períodos
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="distribution-region-filter">
+                            Região
+                        </label>
+
+                        <select id="distribution-region-filter">
+                            <option value="all">
+                                Todas as regiões
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="distribution-category-filter">
+                            Categoria
+                        </label>
+
+                        <select id="distribution-category-filter">
+                            <option value="all">
+                                Todas as categorias
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="distribution-subcategory-filter">
+                            Subcategoria
+                        </label>
+
+                        <select id="distribution-subcategory-filter">
+                            <option value="all">
+                                Todas as subcategorias
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Summary -->
+                <div class="metrics-grid metrics-grid-3">
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Faixa predominante
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="distribution-main-range"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="distribution-main-range-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Categoria predominante
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="distribution-main-category"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="distribution-main-category-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Total de ocorrências
+                        </span>
+
+                        <strong
+                            class="metric-value"
+                            id="distribution-total"
+                        >
+                            —
+                        </strong>
+
+                        <span class="metric-description">
+                            Registros agregados na distribuição
+                        </span>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Main distribution -->
+                <div class="chart-grid chart-grid-1">
+
+                    <article class="chart-card chart-card-large">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Distribuição por faixa de pontuação
+                                </h3>
+
+                                <p>
+                                    Comparação das faixas de score entre
+                                    as categorias disponíveis.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-large">
+                            <canvas id="score-distribution-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="chart-grid chart-grid-2">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Distribuição por categoria
+                                </h3>
+
+                                <p>
+                                    Volume agregado de ocorrências por categoria.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="distribution-category-chart"></canvas>
+                        </div>
+
+                    </article>
+
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Subcategorias em atenção
+                                </h3>
+
+                                <p>
+                                    Subcategorias com maior concentração
+                                    nas faixas inferiores.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="ranking-list"
+                            id="distribution-ranking"
+                        >
+                            <div class="ranking-empty">
+                                Aguardando dados...
+                            </div>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="score-distribution-empty"
+                    hidden
+                >
+                    <span class="empty-state-icon">—</span>
+
+                    <h3>
+                        Nenhuma distribuição disponível
+                    </h3>
+
+                    <p>
+                        Não existem dados para os filtros selecionados.
+                    </p>
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================================
+                 04 — SCORE AVERAGE
+            ====================================================== -->
+            <section
+                class="dashboard-section"
+                id="score-average-section"
+                data-source="punctuation"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-number">04</span>
+
+                        <div class="section-title-group">
+                            <span class="section-eyebrow">
+                                PONTUAÇÃO
+                            </span>
+
+                            <h2>
+                                Média dos indicadores
+                            </h2>
+
+                            <p>
+                                Evolução das médias de pontuação por
+                                categoria e subcategoria.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="section-status"
+                        id="score-average-status"
+                    >
+                        <span class="status-dot"></span>
+
+                        <span class="status-text">
+                            Aguardando dados
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Filters -->
+                <div class="filters-bar">
+
+                    <div class="filter-group">
+
+                        <label for="score-region-filter">
+                            Região
+                        </label>
+
+                        <select id="score-region-filter">
+                            <option value="all">
+                                Todas as regiões
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="score-country-filter">
+                            País
+                        </label>
+
+                        <select id="score-country-filter">
+                            <option value="all">
+                                Todos os países
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="score-category-filter">
+                            Categoria
+                        </label>
+
+                        <select id="score-category-filter">
+                            <option value="all">
+                                Todas as categorias
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="filter-group">
+
+                        <label for="score-subcategory-filter">
+                            Subcategoria
+                        </label>
+
+                        <select id="score-subcategory-filter">
+                            <option value="all">
+                                Todas as subcategorias
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Highlights -->
+                <div class="metrics-grid metrics-grid-4">
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Score atual
+                        </span>
+
+                        <strong
+                            class="metric-value"
+                            id="score-current"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="score-current-period"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Variação
+                        </span>
+
+                        <strong
+                            class="metric-value"
+                            id="score-change"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="score-change-description"
+                        >
+                            Comparação com período anterior
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Melhor evolução
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="score-best-subcategory"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="score-best-subcategory-change"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Maior queda
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="score-worst-subcategory"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="score-worst-subcategory-change"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Trend -->
+                <div class="chart-grid chart-grid-1">
+
+                    <article class="chart-card chart-card-large">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Evolução dos scores
+                                </h3>
+
+                                <p>
+                                    Média de pontuação ao longo dos períodos
+                                    disponíveis.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-large">
+                            <canvas id="score-average-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Ranking -->
+                <div class="content-grid content-grid-2">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Ranking das subcategorias
+                                </h3>
+
+                                <p>
+                                    Indicadores ordenados pela média mais recente.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="ranking-list"
+                            id="score-ranking"
+                        >
+                            <div class="ranking-empty">
+                                Aguardando dados...
+                            </div>
+                        </div>
+
+                    </article>
+
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Comparação entre países
+                                </h3>
+
+                                <p>
+                                    Média de pontuação por país.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="score-country-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="score-average-empty"
+                    hidden
+                >
+                    <span class="empty-state-icon">—</span>
+
+                    <h3>
+                        Nenhum score disponível
+                    </h3>
+
+                    <p>
+                        Não existem médias disponíveis para os filtros
+                        selecionados.
+                    </p>
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================================
+                 05 — AGGREGATE OVERALL
+            ====================================================== -->
+            <section
+                class="dashboard-section dashboard-section-final"
+                id="aggregate-section"
+                data-source="aggregation"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-number">05</span>
+
+                        <div class="section-title-group">
+                            <span class="section-eyebrow">
+                                CONSOLIDAÇÃO
+                            </span>
+
+                            <h2>
+                                Visão geral consolidada
+                            </h2>
+
+                            <p>
+                                Síntese dos principais indicadores agregados
+                                de bem-estar corporativo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="section-status"
+                        id="aggregate-status"
+                    >
+                        <span class="status-dot"></span>
+
+                        <span class="status-text">
+                            Aguardando dados
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <!-- Executive metrics -->
+                <div class="metrics-grid metrics-grid-4">
+
+                    <article class="metric-card metric-card-highlight">
+
+                        <span class="metric-label">
+                            Score médio geral
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-emphasis"
+                            id="overall-score"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="overall-score-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Total de respondentes
+                        </span>
+
+                        <strong
+                            class="metric-value"
+                            id="overall-respondents"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="overall-respondents-description"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Região com maior score
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="overall-best-region"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="overall-best-region-score"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <span class="metric-label">
+                            Região com menor score
+                        </span>
+
+                        <strong
+                            class="metric-value metric-value-text"
+                            id="overall-worst-region"
+                        >
+                            —
+                        </strong>
+
+                        <span
+                            class="metric-description"
+                            id="overall-worst-region-score"
+                        >
+                            Aguardando dados
+                        </span>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Executive charts -->
+                <div class="chart-grid chart-grid-2">
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Evolução do indicador geral
+                                </h3>
+
+                                <p>
+                                    Score médio consolidado por período.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="overall-trend-chart"></canvas>
+                        </div>
+
+                    </article>
+
+
+                    <article class="chart-card">
+
+                        <div class="card-heading">
+
+                            <div>
+                                <h3>
+                                    Score por região
+                                </h3>
+
+                                <p>
+                                    Comparação dos indicadores consolidados
+                                    entre regiões.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="chart-container chart-container-medium">
+                            <canvas id="region-score-chart"></canvas>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- =================================================
+                     INSIGHTS
+                ================================================== -->
+                <div class="insights-block">
+
+                    <div class="insights-heading">
+
+                        <div>
+                            <span class="section-eyebrow">
+                                LEITURA DOS DADOS
+                            </span>
+
+                            <h3>
+                                Principais insights
+                            </h3>
+
+                            <p>
+                                Destaques identificados automaticamente
+                                a partir dos indicadores disponíveis.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="insights-grid">
+
+                        <!-- Attention -->
+                        <article class="insight-card">
+
+                            <span class="insight-label">
+                                Ponto de atenção
+                            </span>
+
+                            <h4 id="insight-attention-title">
+                                —
+                            </h4>
+
+                            <strong
+                                class="insight-metric"
+                                id="insight-attention-metric"
+                            >
+                                —
+                            </strong>
+
+                            <p id="insight-attention-description">
+                                Aguardando dados para identificar
+                                indicadores que merecem atenção.
+                            </p>
+
+                        </article>
+
+
+                        <!-- Positive -->
+                        <article class="insight-card">
+
+                            <span class="insight-label">
+                                Melhor evolução
+                            </span>
+
+                            <h4 id="insight-positive-title">
+                                —
+                            </h4>
+
+                            <strong
+                                class="insight-metric"
+                                id="insight-positive-metric"
+                            >
+                                —
+                            </strong>
+
+                            <p id="insight-positive-description">
+                                Aguardando dados para identificar
+                                a evolução mais positiva.
+                            </p>
+
+                        </article>
+
+
+                        <!-- Region -->
+                        <article class="insight-card">
+
+                            <span class="insight-label">
+                                Atenção regional
+                            </span>
+
+                            <h4 id="insight-region-title">
+                                —
+                            </h4>
+
+                            <strong
+                                class="insight-metric"
+                                id="insight-region-metric"
+                            >
+                                —
+                            </strong>
+
+                            <p id="insight-region-description">
+                                Aguardando dados para comparar
+                                os indicadores regionais.
+                            </p>
+
+                        </article>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="aggregate-empty"
+                    hidden
+                >
+                    <span class="empty-state-icon">—</span>
+
+                    <h3>
+                        Nenhum indicador consolidado disponível
+                    </h3>
+
+                    <p>
+                        O serviço de agregação ainda não retornou
+                        dados válidos.
+                    </p>
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =========================================================
+             FOOTER
+        ========================================================== -->
+        <footer class="dashboard-footer">
+
+            <div class="footer-content">
+
+                <span>
+                    People Analytics
+                </span>
+
+                <span class="footer-separator">
+                    •
+                </span>
+
+                <span>
+                    Indicadores agregados e anônimos
+                </span>
+
+                <span class="footer-separator">
+                    •
+                </span>
+
+                <span id="last-update">
+                    Última atualização: —
+                </span>
+
+            </div>
+
+            <p>
+                Os dados apresentados são consolidados e não permitem
+                a identificação de colaboradores individuais.
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <!-- =============================================================
+         JAVASCRIPT
+    ============================================================== -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
